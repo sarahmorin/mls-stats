@@ -1,25 +1,25 @@
 City
-Street_Direction
-Street_Name
-Street_Number
-Street_Suffix
+Street Direction
+Street Name
+Street Number
+Street Suffix
 Unit
-Area_Desc
+Area Desc
 Bathrooms
 Bedrooms
-Selling_Date
-Curr_Selling_Price
-Contingent_Date
+Selling Date
+Curr Selling Price
+Contingent Date
 DOM
-Listing_Date
-Listing_Number
-Listing_Price
-Lot_Size
-Pending_Date
-Selling_Price
-Square_Footage
+Listing Date
+Listing Number
+Listing Price
+Lot Size
+Pending Date
+Selling Price
+Square Footage
 Status
-Status_Date
+Status Date
 Style
-Style_Desc
-Year_Built
+Style Desc
+Year Built
