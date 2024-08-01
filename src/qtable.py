@@ -1,4 +1,4 @@
-"""Generate Basic Table"""
+"""Generate Quarter Comparison Table"""
 
 #pylint: disable=line-too-long
 #pylint: disable=missing-docstring
@@ -6,8 +6,8 @@
 #pylint: disable=consider-using-f-string
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
+#pylint: disable=broad-exception-caught
 
-import datetime as dt
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as pgo
@@ -16,6 +16,8 @@ from utils import *
 
 try:
     st.title("Quarter Comparison Table")
+    st.write("""Generate a table comparing median price, price/sf, and number of sales for 2 given
+             quarters.""")
 
     with st.form(key='form'):
         # Data Filters
@@ -30,11 +32,12 @@ try:
 
         # TODO: Add more form options
         # Formatting Options
-        agg_row = st.toggle("Include Aggregate Row", value=True)
+        # TODO: Implement agg row
+        # agg_row = st.toggle("Include Aggregate Row", value=True)
 
         submit_button = st.form_submit_button("Generate Table")
 
-    if submit_button:
+    if submit_button and valid_q_v_q(q1, y1, q2, y2):
         q1_str = f"Q{q1} {y1}"
         q2_str = f"Q{q2} {y2}"
         conn = st.connection("mls_db")
@@ -59,9 +62,10 @@ try:
         df1 = conn.query(query1)
         df2 = conn.query(query2)
 
-        # FIXME
-        # st.dataframe(df1)
-        # st.dataframe(df2)
+        if df1.empty:
+            no_data(q1_str)
+        if df2.empty:
+            no_data(q2_str)
 
         df1_med = df1.groupby(group)['selling_price'].median().reset_index(name='med q1')
         df1_sppsf = df1.groupby(group)['sppsf'].mean().reset_index(name='ppsf q1')
@@ -121,7 +125,6 @@ try:
                    'align': 'center'})
                                ])
 
-        st.header("Graphic")
         st.plotly_chart(fig)
 
         st.header("Raw Data")

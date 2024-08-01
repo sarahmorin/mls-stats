@@ -16,6 +16,7 @@ SF_DIST_SORT = {
         'SF District 8': 7,
         'SF District 9': 8,
         'SF District 10': 9,
+        'Summary': 10,
         }
 
 def q_to_date_range(q, year):
@@ -28,6 +29,12 @@ def q_to_date_range(q, year):
     if q == 4:
         return dt.date(year, 10, 1), dt.date(year, 12, 31)
     return None
+
+def valid_q_v_q(q1, y1, q2, y2):
+    if q1 == q2 and y1 == y2:
+        st.warning("Please select 2 different quarters to compare")
+        return False
+    return True
 
 def where_date_range(date_name, d1, d2):
     return f"{date_name} BETWEEN \'{d1.isoformat()}\' AND \'{d2.isoformat()}\'"
@@ -62,3 +69,9 @@ def county_input(title="County"):
     df = conn.query("SELECT DISTINCT county FROM listings")
     return st.multiselect(title, df, [],
                           help="Select county(s)")
+
+def no_data(opt=None):
+    if opt:
+        st.warning(f"No data for the given search criteria: {opt}")
+    else:
+        st.warning("Database has no data for the given search criteria")
