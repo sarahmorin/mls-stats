@@ -3,21 +3,24 @@
 #pylint: disable=line-too-long
 #pylint: disable=missing-docstring
 
+import warnings
 import streamlit as st
 import pandas as pd
 from streamlit_extras.dataframe_explorer import dataframe_explorer
 
 
 try:
-# Connect to DB and get all data
+    # Connect to DB and get all data
     conn = st.connection('mls_db')
     df = conn.query("SELECT * FROM listings")
 
 
-# Display Data as Table
+    # Display Data as Table
     st.title("Browse Database")
-    filtered_df = dataframe_explorer(df)
-    st.dataframe(filtered_df.style.format({'listing_price': '${:,}',
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        filtered_df = dataframe_explorer(df)
+        st.dataframe(filtered_df.style.format({'listing_price': '${:,}',
                                   'selling_price': '${:,}',
                                   'sale_over_list': '{:.0%}',
                                   'lppsf': '${:,.2f}',
