@@ -14,11 +14,8 @@ try:
     st.write("Generate a pie chart of sale prices for a given quarter.")
 
     with st.form(key='form'):
-        c1, c2 = st.columns(2)
-        with c1:
-            q = q_input()
-        with c2:
-            year = year_input()
+        d1, d2 = date_input()
+        county = county_input()
         ptype = ptype_input()
         st.subheader("Ring Segments")
         cols = st.columns(3)
@@ -36,7 +33,7 @@ try:
 
         st.subheader("Appearance")
         acol = st.columns(4)
-        colors = ['#a7d5ed', '#63bff0', '#22a7f0', '#1984c5']
+        colors = ['#00a6fb', '#0582ca', '#006494', '#003554']
         with acol[0]:
             colors[0] = st.color_picker("", value=colors[0])
         with acol[1]:
@@ -50,11 +47,16 @@ try:
 
     if submit_button:
         conn = st.connection("mls_db")
-        d1, d2 = q_to_date_range(q, year)
         date_range = where_date_range('selling_date', d1, d2)
         where = f"WHERE {date_range}"
         if ptype != "Any":
             where += f" AND {where_ptype(ptype)}"
+
+        if len(county) == 1:
+            where += f" AND county =\'{county[0]}\'"
+        elif len(county) > 0:
+            where += f" AND county IN {tuple(county)}"
+
         query = f"SELECT selling_price FROM listings {where}"
 
         df = conn.query(query)
@@ -76,7 +78,12 @@ try:
                 f'${bins[1]:,}-${bins[2]:,}',
                 f'>${bins[2]:,}',
             ]
-        fig = pgo.Figure(data=[pgo.Pie(labels=x, values=df_bins, hole=.6, marker_colors=colors)])
+        fig = pgo.Figure(data=[pgo.Pie(labels=x, values=df_bins, hole=.6,
+                                       marker_colors=colors,sort=False)],
+                         layout={
+                             'title': "Closed Sales by Price",
+                             'legend': {'orientation': 'h'}
+                             })
         st.plotly_chart(fig)
 
 except Exception as e:
