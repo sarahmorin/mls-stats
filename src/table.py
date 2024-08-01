@@ -6,8 +6,8 @@
 #pylint: disable=consider-using-f-string
 #pylint: disable=wildcard-import
 #pylint: disable=unused-wildcard-import
+#pylint: disable=broad-exception-caught
 
-import datetime as dt
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as pgo
@@ -16,8 +16,9 @@ from utils import *
 
 try:
     st.title("Price Comparison Table")
+    st.write("Generate a table comparing sale price statistics for a given quarter.")
 
-    st.write("""
+    st.info("""
              When selecting the county:
              * San Francisco only will produce a table grouped by SF Districts
              * Selecting no county will produce a table of all counties grouped by counties
@@ -34,9 +35,22 @@ try:
         county = county_input()
         ptype = ptype_input()
 
-        # TODO: Add more form options
         # Formatting Options
-        agg_row = st.toggle("Include Aggregate Row", value=True)
+        include_agg_row = st.toggle("Include Aggregate Row", value=True)
+        st.subheader("Include Columns:")
+        cols = st.columns(4)
+        with cols[0]:
+            include_avg_price = st.checkbox("Average Price", value=True)
+            include_ppsf = st.checkbox("Price/SF", value=True)
+        with cols[1]:
+            include_med_price = st.checkbox("Median Price", value=True)
+            include_num = st.checkbox("No. of Sales", value=True)
+        with cols[2]:
+            include_sale_list = st.checkbox("Sale/List Price", value=True)
+            include_dom = st.checkbox("DOM", value=True)
+        with cols[3]:
+            include_max = st.checkbox("High Sale", value=True)
+            include_sale_over_ask = st.checkbox("Sales Over Asking", value=True)
 
         submit_button = st.form_submit_button("Generate Table")
 
@@ -68,7 +82,8 @@ try:
 
         # Get data and compute summary stats
         df = conn.query(query)
-        # st.dataframe(df) # FIXME: remove
+        if df.empty:
+            no_data()
 
         df_avg = df.groupby(group)['selling_price'].mean().reset_index(name='Average Sale Price')
         df_med = df.groupby(group)['selling_price'].median().reset_index(name='Median Sale Price')
@@ -79,49 +94,73 @@ try:
         df_dom = df.groupby(group)['dom'].mean().reset_index(name='DOM')
         df_over_ask = df.query('selling_price > listing_price').groupby(group)['selling_price'].count().reset_index(name='# Sales Over Asking')
 
-        df_stats = pd.merge(df_avg, df_med, on=group)
-        df_stats = pd.merge(df_stats, df_ratio, on=group)
-        df_stats = pd.merge(df_stats, df_max, on=group)
-        df_stats = pd.merge(df_stats, df_sppsf, on=group)
-        df_stats = pd.merge(df_stats, df_sales, on=group)
-        df_stats = pd.merge(df_stats, df_dom, on=group)
-        df_stats = pd.merge(df_stats, df_over_ask, on=group)
+        df_stats = pd.DataFrame(df_avg[group])
+        if include_agg_row:
+            df_stats.loc[len(df_stats)] = {group: 'Summary'}
+        if include_avg_price:
+            df_stats = pd.merge(df_stats, df_avg, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'Average Sale Price'] = df['selling_price'].mean()
+            df_stats['Average Sale Price'] = df_stats['Average Sale Price'].map("${:,.0f}".format)
+        if include_med_price:
+            df_stats = pd.merge(df_stats, df_med, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'Median Sale Price'] = df['selling_price'].median()
+            df_stats['Median Sale Price'] = df_stats['Median Sale Price'].map("${:,.0f}".format)
+        if include_sale_list:
+            df_stats = pd.merge(df_stats, df_ratio, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'Sale/List Price'] = df['sale_over_list'].mean()
+            df_stats['Sale/List Price'] = df_stats['Sale/List Price'].map("{:.0%}".format)
+        if include_max:
+            df_stats = pd.merge(df_stats, df_max, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'High Sale'] = df['selling_price'].max()
+            df_stats['High Sale'] = df_stats['High Sale'].map("${:,}".format)
+        if include_ppsf:
+            df_stats = pd.merge(df_stats, df_sppsf, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'Sale Price/SF'] = df['sppsf'].mean()
+            df_stats['Sale Price/SF'] = df_stats['Sale Price/SF'].map("${:,.0f}".format)
+        if include_num:
+            df_stats = pd.merge(df_stats, df_sales, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', '# of Sales'] = df_stats['# of Sales'].sum()
+        if include_dom:
+            df_stats = pd.merge(df_stats, df_dom, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'DOM'] = df['dom'].mean()
+            df_stats['DOM'] = df_stats['DOM'].map("{:.0f}".format)
+        if include_sale_over_ask:
+            df_stats = pd.merge(df_stats, df_over_ask, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', '# Sales Over Asking'] = df_stats['# Sales Over Asking'].sum()
+
         if group == "district":
             df_stats = df_stats.sort_values(by=['district'], key=lambda x: x.map(SF_DIST_SORT))
 
-        # Add Aggregate row
-        if agg_row:
-            agg_row = {
-                    'Average Sale Price': df['selling_price'].mean(),
-                    'Median Sale Price': df['selling_price'].median(),
-                    'Sale/List Price': df['sale_over_list'].mean(),
-                    'High Sale': df['selling_price'].max(),
-                    'Sale Price/SF': df['sppsf'].mean(),
-                    '# of Sales': df_stats['# of Sales'].sum(),
-                    'DOM': df['dom'].mean(),
-                    '# Sales Over Asking': df_stats['# Sales Over Asking'].sum(),
-                    }
-            df_stats.loc[len(df_stats)] = agg_row
-
-        # Format Columns
-        df_stats['Average Sale Price'] = df_stats['Average Sale Price'].map("${:,.0f}".format)
-        df_stats['Median Sale Price'] = df_stats['Median Sale Price'].map("${:,.0f}".format)
-        df_stats['Sale/List Price'] = df_stats['Sale/List Price'].map("{:.0%}".format)
-        df_stats['High Sale'] = df_stats['High Sale'].map("${:,}".format)
-        df_stats['Sale Price/SF'] = df_stats['Sale Price/SF'].map("${:,.0f}".format)
-        df_stats['DOM'] = df_stats['DOM'].map("{:.0f}".format)
-        df_stats.columns = df_stats.columns.str.title()
+        df_stats.rename(columns={'dsitrict': 'District', 'county': 'County', 'city':'City'},
+                        inplace=True)
 
         cols = list(df_stats.columns)
         vals = df_stats.transpose().values.tolist()
         fig = pgo.Figure(data=[pgo.Table(
             header={'values': cols,
-                    'align': 'center'},
+                    'align': 'center',
+                    'line_color': 'white',
+                    'fill_color': 'white',
+                    'font': {
+                        'color': 'black',
+                        'size': 14,
+                        }
+                    },
             cells={'values': vals,
-                   'align': 'center'})
+                   'align': 'center',
+                    'line_color': 'white',
+                   'fill_color': [['white', '#f9f9f9']*100],
+                   })
                                ])
 
-        st.header("Graphic")
         st.plotly_chart(fig)
 
         st.header("Raw Data")
