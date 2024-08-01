@@ -8,6 +8,7 @@ home_page = st.Page("home.py", title="Home")
 # Data interface
 upload_page = st.Page("upload.py", title="Upload Data")
 browse_page = st.Page("browse.py", title="Browse Database")
+county_page = st.Page("county.py", title="County Key")
 # Graphics
 table_page = st.Page("table.py", title="Comparison Table")
 q_table_page = st.Page("qtable.py", title="Q vs. Q Table")
@@ -24,16 +25,15 @@ med_vs_aom_page = st.Page("med_v_aom.py", title="Median Price vs. AOM")
 # ===============================================
 # Navigation
 # -----------------------------------------------
+st.set_page_config(page_title="MLS DB")
 pg = st.navigation(
     {
         "": [home_page],
-        "Database": [upload_page, browse_page],
+        "Database": [upload_page, browse_page, county_page],
         "Charts": [table_page, q_table_page, sale_dist_page, circle_page, high_end_page,
                    sale_over_list_page, line_page, sale_vs_closed_page, med_vs_aom_page],
     }
 )
-st.set_page_config(page_title="Michael's MLS App")
-
 # ===============================================
 # Setup State and Run
 # -----------------------------------------------
