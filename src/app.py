@@ -12,13 +12,13 @@ county_page = st.Page("county.py", title="County Key")
 # Graphics
 table_page = st.Page("table.py", title="Comparison Table")
 q_table_page = st.Page("qtable.py", title="Q vs. Q Table")
-sale_dist_page = st.Page("dist.py", title="Sale Distribution")
-circle_page = st.Page("circle.py", title="Closed Sales by Price")
-high_end_page = st.Page("he_sale.py", title="High End Sales Change")
-sale_over_list_page = st.Page("sol.py", title="Sales Over List Bar")
-line_page = st.Page("lines.py", title="Line Graphs over Time")
-sale_vs_closed_page = st.Page("sale_v_close.py", title="Sales Price vs. Closed Sales")
-med_vs_aom_page = st.Page("med_v_aom.py", title="Median Price vs. AOM")
+sale_dist_page = st.Page("dist.py", title="Scatter Line: Price Distribution")
+circle_page = st.Page("circle.py", title="Pie Chart: Sales by Price")
+high_end_page = st.Page("he_sale.py", title="Q vs. Q Sale Distribution")
+sale_over_list_page = st.Page("sol.py", title="Bar: Q vs. Q % Sales over List")
+line_page = st.Page("lines.py", title="Line Graphs: Change in X over time")
+sale_vs_closed_page = st.Page("sale_v_close.py", title="Line and Bar: Sale Price vs. # Sales")
+med_vs_aom_page = st.Page("med_v_aom.py", title="Line: Median Price vs. AOM")
 
 # ===============================================
 
@@ -30,8 +30,9 @@ pg = st.navigation(
     {
         "": [home_page],
         "Database": [upload_page, browse_page, county_page],
-        "Charts": [table_page, q_table_page, sale_dist_page, circle_page, high_end_page,
-                   sale_over_list_page, line_page, sale_vs_closed_page, med_vs_aom_page],
+        "Tables": [table_page, q_table_page],
+        "Distributions": [sale_dist_page, circle_page, high_end_page],
+        "Graphs": [sale_over_list_page, line_page, sale_vs_closed_page, med_vs_aom_page],
     }
 )
 # ===============================================
