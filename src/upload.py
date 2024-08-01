@@ -76,11 +76,6 @@ def get_sale_over_list(row):
 try:
     st.title("Upload Data")
 
-# Remove this when done testing
-    if st.button("Refresh DB"):
-        create_db()
-        st.cache_data.clear()
-
     upload_file = st.file_uploader("Choose a file",
                                    type='csv',
                                    accept_multiple_files=True,
@@ -165,6 +160,18 @@ try:
             # Print Success
             st.cache_data.clear()
             st.success("New data successfully uploaded")
+
+    # Reset Button
+    with st.expander("Reset Database"):
+        st.error("WARNING: This cannot be undone")
+        st.write("""If you want to reset the database - i.e. delete all the data and start fresh,
+        press the button bellow. This is a permanent operation that cannot be undone. Only do this
+        if you are absolutely certain.""")
+
+        if st.button("Reset Database"):
+            create_db()
+            st.cache_data.clear()
+
 
 except Exception as e:
     st.error("Failed to upload data. Make sure `.csv` file is the correct format")
