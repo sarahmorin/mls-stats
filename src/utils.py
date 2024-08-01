@@ -70,8 +70,11 @@ def county_input(title="County"):
     return st.multiselect(title, df, [],
                           help="Select county(s)")
 
-def no_data(opt=None):
+def no_data(opt=None, stop=True):
     if opt:
         st.warning(f"No data for the given search criteria: {opt}")
     else:
         st.warning("Database has no data for the given search criteria")
+
+    if stop:
+        st.stop()

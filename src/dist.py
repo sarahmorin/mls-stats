@@ -39,6 +39,8 @@ try:
         query = f"SELECT * FROM listings {where}"
 
         df = conn.query(query)
+        if df.empty:
+            no_data()
 
         fig = pgo.Figure(data=[pgo.Scatter(x=df['selling_price'],
                                            y=[1 for _ in range(len(df['selling_price']))],
