@@ -4,6 +4,7 @@ import streamlit as st
 # ===============================================
 # Create Pages
 # -----------------------------------------------
+home_page = st.Page("home.py", title="Home")
 # Data interface
 upload_page = st.Page("upload.py", title="Upload Data")
 browse_page = st.Page("browse.py", title="Browse Database")
@@ -25,6 +26,7 @@ med_vs_aom_page = st.Page("med_v_aom.py", title="Median Price vs. AOM")
 # -----------------------------------------------
 pg = st.navigation(
     {
+        "": [home_page],
         "Database": [upload_page, browse_page],
         "Charts": [table_page, q_table_page, sale_dist_page, circle_page, high_end_page,
                    sale_over_list_page, line_page, sale_vs_closed_page, med_vs_aom_page],
