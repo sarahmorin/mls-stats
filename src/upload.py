@@ -50,6 +50,13 @@ def get_baths(row):
     nums = row['bathrooms'].split()
     return int(nums[0])
 
+def get_beds(row):
+    try:
+        return int(row['bedrooms'])
+    except Exception as e:
+        nums = row['bedrooms'].split('-')
+        return int(nums[1])
+
 def get_lppsf(row):
     if pd.isnull(row['square_footage']):
         return None
@@ -145,6 +152,8 @@ try:
                 df = df.drop(columns=['street_name', 'street_number', 'street_suffix', 'unit'])
                 # Parse num bathrooms as int
                 df['bathrooms'] = df.apply(get_baths, axis=1)
+                # Parse num beds as int (if range is given eg. 3-4 use max)
+                df['bedrooms'] = df.apply(get_beds, axis=1)
                 # Compute price/sf
                 df['lppsf'] = df.apply(get_lppsf, axis=1)
                 df['sppsf'] = df.apply(get_sppsf, axis=1)
