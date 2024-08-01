@@ -30,10 +30,16 @@ try:
             y2 = year_input("Year B")
         ptype = ptype_input()
 
-        # TODO: Add more form options
         # Formatting Options
-        # TODO: Implement agg row
-        # agg_row = st.toggle("Include Aggregate Row", value=True)
+        include_agg_row = st.toggle("Include Aggregate Row", value=True)
+        st.subheader("Include Columns:")
+        cols = st.columns(3)
+        with cols[0]:
+            include_med_price = st.checkbox("Median Price", value=True)
+        with cols[1]:
+            include_ppsf = st.checkbox("Price/SF", value=True)
+        with cols[2]:
+            include_num = st.checkbox("No. of Sales", value=True)
 
         submit_button = st.form_submit_button("Generate Table")
 
@@ -74,37 +80,39 @@ try:
         df2_sppsf = df2.groupby(group)['sppsf'].mean().reset_index(name='ppsf q2')
         df2_sales = df2.groupby(group)['selling_price'].count().reset_index(name='sales q2')
 
-        df_stats = pd.merge(df1_med, df2_med, on=group)
-        df_stats['Median Price Change'] = (df_stats['med q2'] - df_stats['med q1'])/df_stats['med q1']
-        df_stats = pd.merge(df_stats, df1_sppsf, on=group)
-        df_stats = pd.merge(df_stats, df2_sppsf, on=group)
-        df_stats['Price/SF Change'] = (df_stats['ppsf q2'] - df_stats['ppsf q1'])/df_stats['ppsf q1']
-        df_stats = pd.merge(df_stats, df1_sales, on=group)
-        df_stats = pd.merge(df_stats, df2_sales, on=group)
-        df_stats['# of Sales Change'] = (df_stats['sales q2'] - df_stats['sales q1'])/df_stats['sales q1']
+        df_stats = pd.DataFrame(df1_med[group])
+        if include_agg_row:
+            df_stats.loc[len(df_stats)] = {group: 'Summary'}
+        if include_med_price:
+            df_stats = pd.merge(df_stats, df1_med, on=group, how='left')
+            df_stats = pd.merge(df_stats, df2_med, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'med q1'] = df1['selling_price'].median()
+                df_stats.loc[df_stats[group] == 'Summary', 'med q2'] = df2['selling_price'].median()
+            df_stats['Median Price Change'] = (df_stats['med q2'] - df_stats['med q1'])/df_stats['med q1']
+            df_stats['Median Price Change'] = df_stats['Median Price Change'].map("{:.1%}".format)
+            df_stats['med q1'] = df_stats['med q1'].map("${:,.0f}".format)
+            df_stats['med q2'] = df_stats['med q2'].map("${:,.0f}".format)
+        if include_ppsf:
+            df_stats = pd.merge(df_stats, df1_sppsf, on=group, how='left')
+            df_stats = pd.merge(df_stats, df2_sppsf, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'ppsf q1'] = df1['sppsf'].median()
+                df_stats.loc[df_stats[group] == 'Summary', 'ppsf q2'] = df2['sppsf'].median()
+            df_stats['Price/SF Change'] = (df_stats['ppsf q2'] - df_stats['ppsf q1'])/df_stats['ppsf q1']
+            df_stats['Price/SF Change'] = df_stats['Price/SF Change'].map("{:.1%}".format)
+            df_stats['ppsf q1'] = df_stats['ppsf q1'].map("${:,.0f}".format)
+            df_stats['ppsf q2'] = df_stats['ppsf q2'].map("${:,.0f}".format)
+        if include_num:
+            df_stats = pd.merge(df_stats, df1_sales, on=group, how='left')
+            df_stats = pd.merge(df_stats, df2_sales, on=group, how='left')
+            if include_agg_row:
+                df_stats.loc[df_stats[group] == 'Summary', 'sales q1'] = df1['sppsf'].count()
+                df_stats.loc[df_stats[group] == 'Summary', 'sales q2'] = df2['sppsf'].count()
+            df_stats['# of Sales Change'] = (df_stats['sales q2'] - df_stats['sales q1'])/df_stats['sales q1']
+            df_stats['# of Sales Change'] = df_stats['# of Sales Change'].map("{:.1%}".format)
 
-        # # Add Aggregate row
-        # if agg_row:
-        #     agg_row = {
-        #             'Average Sale Price': df['selling_price'].mean(),
-        #             'Median Sale Price': df['selling_price'].median(),
-        #             'Sale/List Price': df['sale_over_list'].mean(),
-        #             'High Sale': df['selling_price'].max(),
-        #             'Sale Price/SF': df['sppsf'].mean(),
-        #             '# of Sales': df_stats['# of Sales'].sum(),
-        #             'DOM': df['dom'].mean(),
-        #             '# Sales Over Asking': df_stats['# Sales Over Asking'].sum(),
-        #             }
-        #     df_stats.loc[len(df_stats)] = agg_row
-        #
         # Format Columns
-        df_stats['med q1'] = df_stats['med q1'].map("${:,.0f}".format)
-        df_stats['med q2'] = df_stats['med q2'].map("${:,.0f}".format)
-        df_stats['ppsf q1'] = df_stats['ppsf q1'].map("${:,.0f}".format)
-        df_stats['ppsf q2'] = df_stats['ppsf q2'].map("${:,.0f}".format)
-        df_stats['Median Price Change'] = df_stats['Median Price Change'].map("{:.1%}".format)
-        df_stats['Price/SF Change'] = df_stats['Price/SF Change'].map("{:.1%}".format)
-        df_stats['# of Sales Change'] = df_stats['# of Sales Change'].map("{:.1%}".format)
         df_stats.rename(columns={
             'med q1': f'Median Price {q1_str}',
             'med q2': f'Median Price {q2_str}',
@@ -112,9 +120,11 @@ try:
             'ppsf q2': f'Price/SF {q2_str}',
             'sales q1': f'Sales {q1_str}',
             'sales q2': f'Sales {q2_str}',
+            'county': 'County',
+            'city': 'City',
+            'district': 'District',
             },
             inplace=True)
-        df_stats.columns = df_stats.columns.str.title()
 
         cols = list(df_stats.columns)
         vals = df_stats.transpose().values.tolist()
