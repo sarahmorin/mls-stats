@@ -19,6 +19,12 @@ SF_DIST_SORT = {
         'Summary': 10,
         }
 
+BLUE="#002349"
+LIGHT_GREY="#adadad"
+DARK_GREY="#67737a"
+GOLD1="#a08525"
+GOLD2="#c29b40"
+
 def q_to_date_range(q, year):
     if q == 1:
         return dt.date(year, 1, 1), dt.date(year, 3, 31)
@@ -30,12 +36,6 @@ def q_to_date_range(q, year):
         return dt.date(year, 10, 1), dt.date(year, 12, 31)
     return None
 
-def valid_q_v_q(q1, y1, q2, y2):
-    if q1 == q2 and y1 == y2:
-        st.warning("Please select 2 different quarters to compare")
-        return False
-    return True
-
 def where_date_range(date_name, d1, d2):
     return f"{date_name} BETWEEN \'{d1.isoformat()}\' AND \'{d2.isoformat()}\'"
 
@@ -46,20 +46,28 @@ def where_ptype(ptype):
         return "type=\'C\'"
     return ""
 
-def date_input(d1=dt.date.today(), d2=dt.date.today()):
-    return st.date_input("Date Range", (d1, d2))
+def date_input(label="Date Range"):
+    month = dt.date.today().month
+    year = dt.date.today().year
+    if month < 4:
+        d1, d2 = q_to_date_range(4, year-1)
+    elif month < 7:
+        d1, d2 = q_to_date_range(1, year)
+    elif month < 10:
+        d1, d2 = q_to_date_range(2, year)
+    else:
+        d1, d2 = q_to_date_range(3, year)
+
+    return st.date_input(label, (d1, d2))
 
 def ptype_input(include_all=True):
     pytpes = ["Single Family", "Condo"]
     if include_all:
-        pytpes.append("Any")
+        pytpes.insert(0, "Any")
     return st.selectbox("Property Type", pytpes)
 
 def group_input(title="Group By"):
     return st.selectbox(title, ["District (SF)", "City", "County"])
-
-def q_input(title="Quarter"):
-    return st.radio(title, [1, 2, 3, 4], horizontal=True)
 
 def year_input(title="Year"):
     return st.selectbox(title, list(range(dt.date.today().year, 1900, -1)))
@@ -78,3 +86,10 @@ def no_data(opt=None, stop=True):
 
     if stop:
         st.stop()
+
+def download(df, label="Download Data as CSV", name="mls-data.csv"):
+    st.download_button(
+            label=label,
+            data=df.to_csv().encode("utf-8"),
+            file_name=name,
+            mime="text/csv")
