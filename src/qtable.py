@@ -19,15 +19,19 @@ try:
     st.write("""Generate a table comparing median price, price/sf, and number of sales for 2 given
              quarters.""")
 
+    county_info()
+
     with st.form(key='form'):
         # Data Filters
+        st.subheader("Search Criteria")
         c1, c2 = st.columns(2)
         with c1:
-            q1 = q_input("Quater A")
-            y1 = year_input("Year A")
+            d11, d12 = date_input(label="Time Period 1")
+            t1_str = st.text_input("Time Period 1 Label", "Q1")
         with c2:
-            q2 = q_input("Quarter B")
-            y2 = year_input("Year B")
+            d21, d22 = date_input(label="Time Period 2")
+            t2_str = st.text_input("Time Period 2 Label", "Q2")
+        county = county_input()
         ptype = ptype_input()
 
         # Formatting Options
@@ -43,12 +47,8 @@ try:
 
         submit_button = st.form_submit_button("Generate Table")
 
-    if submit_button and valid_q_v_q(q1, y1, q2, y2):
-        q1_str = f"Q{q1} {y1}"
-        q2_str = f"Q{q2} {y2}"
+    if submit_button:
         conn = st.connection("mls_db")
-        d11, d12 = q_to_date_range(q1, y1)
-        d21, d22 = q_to_date_range(q2, y2)
         date_range1 = where_date_range('selling_date', d11, d12)
         date_range2 = where_date_range('selling_date', d21, d22)
         where1 = f"WHERE {date_range1}"
@@ -58,7 +58,21 @@ try:
             where1 += f" AND {where_ptype(ptype)}"
             where2 += f" AND {where_ptype(ptype)}"
 
-        group = "county"
+        if len(county) == 0:
+            group = "county"
+        elif len(county) == 1:
+            if county[0] == "San Francisco":
+                group = "district"
+                where1 += " AND city=\'San Francisco\'"
+                where2 += " AND city=\'San Francisco\'"
+            else:
+                group = "city"
+                where1 += f" AND county=\'{county[0]}\'"
+                where2 += f" AND county=\'{county[0]}\'"
+        else:
+            where1 += f" AND county IN {tuple(county)}"
+            where2 += f" AND county IN {tuple(county)}"
+            group = "city"
 
         # Construct query
         query1 = f"SELECT * FROM listings {where1}"
@@ -69,9 +83,9 @@ try:
         df2 = conn.query(query2)
 
         if df1.empty:
-            no_data(q1_str)
+            no_data(t1_str)
         if df2.empty:
-            no_data(q2_str)
+            no_data(t2_str)
 
         df1_med = df1.groupby(group)['selling_price'].median().reset_index(name='med q1')
         df1_sppsf = df1.groupby(group)['sppsf'].mean().reset_index(name='ppsf q1')
@@ -112,34 +126,24 @@ try:
             df_stats['# of Sales Change'] = (df_stats['sales q2'] - df_stats['sales q1'])/df_stats['sales q1']
             df_stats['# of Sales Change'] = df_stats['# of Sales Change'].map("{:.1%}".format)
 
+        if group == "district":
+            df_stats = df_stats.sort_values(by=['district'], key=lambda x: x.map(SF_DIST_SORT))
+
         # Format Columns
         df_stats.rename(columns={
-            'med q1': f'Median Price {q1_str}',
-            'med q2': f'Median Price {q2_str}',
-            'ppsf q1': f'Price/SF {q1_str}',
-            'ppsf q2': f'Price/SF {q2_str}',
-            'sales q1': f'Sales {q1_str}',
-            'sales q2': f'Sales {q2_str}',
+            'med q1': f'Median Price {t1_str}',
+            'med q2': f'Median Price {t2_str}',
+            'ppsf q1': f'Price/SF {t1_str}',
+            'ppsf q2': f'Price/SF {t2_str}',
+            'sales q1': f'Sales {t1_str}',
+            'sales q2': f'Sales {t2_str}',
             'county': 'County',
             'city': 'City',
             'district': 'District',
             },
             inplace=True)
 
-        cols = list(df_stats.columns)
-        vals = df_stats.transpose().values.tolist()
-        fig = pgo.Figure(data=[pgo.Table(
-            header={'values': cols,
-                    'align': 'center'},
-            cells={'values': vals,
-                   'align': 'center'})
-                               ])
-
-        st.plotly_chart(fig)
-
-        st.header("Raw Data")
-        st.dataframe(df_stats,
-                     hide_index=True)
+        st.dataframe(df_stats, hide_index=True)
 
 except Exception as e:
     st.error(e)

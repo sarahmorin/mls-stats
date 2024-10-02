@@ -22,11 +22,12 @@ try:
         st.subheader("Search Criteria")
         c1, c2 = st.columns(2)
         with c1:
-            q1 = q_input("Quarter A")
-            y1 = year_input("Year A")
+            d11, d12 = date_input(label="Time Period 1")
+            t1_str = st.text_input("Time Period 1 Label", "")
         with c2:
-            q2 = q_input("Quarter B")
-            y2 = year_input("Year B")
+            d21, d22 = date_input(label="Time Period 2")
+            t2_str = st.text_input("Time Period 2 Label", "")
+        county = county_input()
         ptype = ptype_input()
 
         st.subheader("Histogram Bins")
@@ -50,19 +51,15 @@ try:
         st.subheader("Appearance")
         ac1, ac2 = st.columns(2)
         with ac1:
-            q1_color = st.color_picker("Quarter A Color", value='#22a7f0')
+            t1_color = st.color_picker("Color 1", value=BLUE)
         with ac2:
-            q2_color = st.color_picker("Quarter B Color", value='#115f9a')
+            t2_color = st.color_picker("Color 2", value=GOLD1)
 
-        submit_button = st.form_submit_button("Generate Table")
+        submit_button = st.form_submit_button("Generate Chart")
 
-    if submit_button and valid_q_v_q(q1, y1, q2, y2):
+    if submit_button:
         bins = sorted(bins)
-        q1_str = f"Q{q1} {y1}"
-        q2_str = f"Q{q2} {y2}"
         conn = st.connection("mls_db")
-        d11, d12 = q_to_date_range(q1, y1)
-        d21, d22 = q_to_date_range(q2, y2)
         date_range1 = where_date_range('selling_date', d11, d12)
         date_range2 = where_date_range('selling_date', d21, d22)
         where1 = f"WHERE {date_range1}"
@@ -71,6 +68,14 @@ try:
         if ptype != "Any":
             where1 += f" AND {where_ptype(ptype)}"
             where2 += f" AND {where_ptype(ptype)}"
+
+        if len(county) == 1:
+            where1 += f" AND county =\'{county[0]}\'"
+            where2 += f" AND county =\'{county[0]}\'"
+        elif len(county) > 0:
+            where1 += f" AND county IN {tuple(county)}"
+            where2 += f" AND county IN {tuple(county)}"
+
 
         group = "county"
 
@@ -83,9 +88,9 @@ try:
         df2 = conn.query(query2)
 
         if df1.empty:
-            no_data(q1_str)
+            no_data()
         if df2.empty:
-            no_data(q2_str)
+            no_data()
 
         df1_bins = []
         df2_bins = []
@@ -105,8 +110,8 @@ try:
                 f'${bins[2]:,}-${bins[3]:,}',
                 f'>${bins[3]:,}',
             ]
-        bar1 = pgo.Bar(x=x, y=df1_bins, text=df1_bins, name=q1_str, marker_color=q1_color)
-        bar2 = pgo.Bar(x=x, y=df2_bins, text=df2_bins, name=q2_str, marker_color=q2_color)
+        bar1 = pgo.Bar(x=x, y=df1_bins, text=df1_bins, name=t1_str, marker_color=t1_color)
+        bar2 = pgo.Bar(x=x, y=df2_bins, text=df2_bins, name=t2_str, marker_color=t2_color)
         fig = pgo.Figure(data=[bar1, bar2])
         st.plotly_chart(fig)
 

@@ -10,28 +10,18 @@
 
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as pgo
 
 from utils import *
 
 try:
-    st.title("Price Comparison Table")
+    st.title("Single Date Range Table")
     st.write("Generate a table comparing sale price statistics for a given quarter.")
 
-    st.info("""
-             When selecting the county:
-             * San Francisco only will produce a table grouped by SF Districts
-             * Selecting no county will produce a table of all counties grouped by counties
-             * Any other choices will produce a table grouped by cities
-             """)
+    county_info()
 
     with st.form(key='form'):
         # Data Filters
-        c1, c2 = st.columns(2)
-        with c1:
-            q = q_input()
-        with c2:
-            year = year_input()
+        d1, d2 = date_input()
         county = county_input()
         ptype = ptype_input()
 
@@ -56,7 +46,6 @@ try:
 
     if submit_button:
         conn = st.connection("mls_db")
-        d1, d2 = q_to_date_range(q, year)
         date_range = where_date_range('selling_date', d1, d2)
         where = f"WHERE {date_range}"
         group = ""
@@ -116,7 +105,7 @@ try:
             df_stats = pd.merge(df_stats, df_max, on=group, how='left')
             if include_agg_row:
                 df_stats.loc[df_stats[group] == 'Summary', 'High Sale'] = df['selling_price'].max()
-            df_stats['High Sale'] = df_stats['High Sale'].map("${:,}".format)
+            df_stats['High Sale'] = df_stats['High Sale'].map("${:,.0f}".format)
         if include_ppsf:
             df_stats = pd.merge(df_stats, df_sppsf, on=group, how='left')
             if include_agg_row:
@@ -139,31 +128,9 @@ try:
         if group == "district":
             df_stats = df_stats.sort_values(by=['district'], key=lambda x: x.map(SF_DIST_SORT))
 
-        df_stats.rename(columns={'dsitrict': 'District', 'county': 'County', 'city':'City'},
+        df_stats.rename(columns={'district': 'District', 'county': 'County', 'city':'City'},
                         inplace=True)
 
-        cols = list(df_stats.columns)
-        vals = df_stats.transpose().values.tolist()
-        fig = pgo.Figure(data=[pgo.Table(
-            header={'values': cols,
-                    'align': 'center',
-                    'line_color': 'white',
-                    'fill_color': 'white',
-                    'font': {
-                        'color': 'black',
-                        'size': 14,
-                        }
-                    },
-            cells={'values': vals,
-                   'align': 'center',
-                    'line_color': 'white',
-                   'fill_color': [['white', '#f9f9f9']*100],
-                   })
-                               ])
-
-        st.plotly_chart(fig)
-
-        st.header("Raw Data")
         st.dataframe(df_stats,
                      hide_index=True)
 

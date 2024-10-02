@@ -18,23 +18,18 @@ try:
     st.title("Q vs. Q Sales over List Price")
     st.write("Generate a bar graph comparing percentage of sales over list price for 2 quarters.")
 
-    st.info("""
-             When selecting the county:
-             * San Francisco only will produce a table grouped by SF Districts
-             * Selecting no county will produce a table of all counties grouped by county
-             * Any other choices will produce a table grouped by city
-             """)
+    county_info()
 
     with st.form(key='form'):
         # Data Filters
         st.subheader("Search Criteria")
         c1, c2 = st.columns(2)
         with c1:
-            q1 = q_input("Quarter A")
-            y1 = year_input("Year A")
+            d11, d12 = date_input(label="Time Period 1")
+            t1_str = st.text_input("Time Period 1 Label", "")
         with c2:
-            q2 = q_input("Quarter B")
-            y2 = year_input("Year B")
+            d21, d22 = date_input(label="Time Period 2")
+            t2_str = st.text_input("Time Period 2 Label", "")
         county = county_input()
         ptype = ptype_input()
 
@@ -42,18 +37,14 @@ try:
         st.subheader("Appearance")
         ac1, ac2 = st.columns(2)
         with ac1:
-            q1_color = st.color_picker("Quarter A Color", value='#22a7f0')
+            t1_color = st.color_picker("Color 1", value=BLUE)
         with ac2:
-            q2_color = st.color_picker("Quarter B Color", value='#115f9a')
+            t2_color = st.color_picker("Color 2", value=GOLD1)
 
         submit_button = st.form_submit_button("Generate Table")
 
     if submit_button:
-        q1_str = f"Q{q1} {y1}"
-        q2_str = f"Q{q2} {y2}"
         conn = st.connection("mls_db")
-        d11, d12 = q_to_date_range(q1, y1)
-        d21, d22 = q_to_date_range(q2, y2)
         date_range1 = where_date_range('selling_date', d11, d12)
         date_range2 = where_date_range('selling_date', d21, d22)
         where1 = f"WHERE {date_range1}"
@@ -89,14 +80,14 @@ try:
         df2 = conn.query(query2)
 
         if df1.empty:
-            no_data(q1_str)
+            no_data(t1_str)
         if df2.empty:
-            no_data(q2_str)
+            no_data(t2_str)
 
         df1['perc'] = df1['perc'].map("{:.1%}".format)
         df2['perc'] = df2['perc'].map("{:.1%}".format)
-        bar1 = pgo.Bar(x=df1[group], y=df1['perc'], text=df1['perc'], name=q1_str, marker_color=q1_color)
-        bar2 = pgo.Bar(x=df2[group], y=df2['perc'], text=df2['perc'], name=q2_str, marker_color=q2_color)
+        bar1 = pgo.Bar(x=df1[group], y=df1['perc'], text=df1['perc'], name=t1_str, marker_color=t1_color)
+        bar2 = pgo.Bar(x=df2[group], y=df2['perc'], text=df2['perc'], name=t2_str, marker_color=t2_color)
         fig = pgo.Figure(data=[bar1, bar2])
         st.plotly_chart(fig)
 
