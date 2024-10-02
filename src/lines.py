@@ -29,8 +29,9 @@ def make_plot(df, group, freq, title):
     return fig
 
 try:
-    st.title("Year over Year Comparisons")
-    st.write("""Generate a collection of line graphs comparing a given statistic over 2 years.""")
+    st.title("Line Graphs")
+    st.write("""Generate a collection of line graphs comparing a given statistic across areas in a
+             given time period.""")
 
     with st.form(key='form'):
         st.subheader("Search Criteria")
