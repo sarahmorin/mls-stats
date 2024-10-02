@@ -14,7 +14,7 @@ from utils import *
 line_styles = get_line_styles()
 
 def make_plot(df, group, freq, title):
-    if freq == 'M':
+    if freq == 'ME':
         df['selling_date'] = df['selling_date'].map(to_month)
     elif freq == 'QS':
         df['selling_date'] = df['selling_date'].map(to_quarter_year)
@@ -78,7 +78,7 @@ try:
         df['selling_date'] = pd.to_datetime(df['selling_date'])
         GROUP_FREQ = ''
         if date_group == 'Month':
-            GROUP_FREQ = 'M'
+            GROUP_FREQ = 'ME'
         elif date_group == 'Quarter':
             GROUP_FREQ = 'QS'
         else:

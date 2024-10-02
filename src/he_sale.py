@@ -23,10 +23,10 @@ try:
         c1, c2 = st.columns(2)
         with c1:
             d11, d12 = date_input(label="Time Period 1")
-            t1_str = st.text_input("Time Period 1 Label", "")
+            t1_str = st.text_input("Time Period 1 Label", "Q")
         with c2:
             d21, d22 = date_input(label="Time Period 2")
-            t2_str = st.text_input("Time Period 2 Label", "")
+            t2_str = st.text_input("Time Period 2 Label", "Q")
         county = county_input()
         ptype = ptype_input()
 
@@ -40,13 +40,13 @@ try:
                 3500000,
                 ]
         with cols[0]:
-            bins[0] = st.number_input("", value=bins[0])
+            bins[0] = st.number_input("Bin 1", value=bins[0])
         with cols[1]:
-            bins[1] = st.number_input("", value=bins[1])
+            bins[1] = st.number_input("Bin 2", value=bins[1])
         with cols[2]:
-            bins[2] = st.number_input("", value=bins[2])
+            bins[2] = st.number_input("Bin 3", value=bins[2])
         with cols[3]:
-            bins[3] = st.number_input("", value=bins[3])
+            bins[3] = st.number_input("Bin 4", value=bins[3])
 
         st.subheader("Appearance")
         ac1, ac2 = st.columns(2)
@@ -117,7 +117,7 @@ try:
 
         expander = st.expander("Underlying Data")
         expander.write("Computed Bin Values")
-        expander.table([x, df1_bins, df2_bins])
+        expander.table([bins, df1_bins, df2_bins])
         expander.write("Full Dataset Period 1")
         expander.dataframe(df1)
         expander.write("Full Dataset Period 2")

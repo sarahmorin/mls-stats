@@ -25,10 +25,10 @@ try:
         c1, c2 = st.columns(2)
         with c1:
             d11, d12 = date_input(label="Time Period 1")
-            t1_str = st.text_input("Time Period 1 Label", "Q1")
+            t1_str = st.text_input("Time Period 1 Label", "Q")
         with c2:
             d21, d22 = date_input(label="Time Period 2")
-            t2_str = st.text_input("Time Period 2 Label", "Q2")
+            t2_str = st.text_input("Time Period 2 Label", "Q")
         county = county_input()
         ptype = ptype_input()
 

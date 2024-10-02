@@ -11,7 +11,7 @@ import plotly.graph_objects as pgo
 from utils import *
 
 def make_plot(df1, df2, freq, y1, y2, color1, color2, title):
-    if freq == 'M':
+    if freq == 'ME':
         df1['selling_date'] = df1['selling_date'].map(to_month)
         df2['selling_date'] = df2['selling_date'].map(to_month)
     elif freq == 'QS':
@@ -92,7 +92,7 @@ try:
         df2['selling_date'] = pd.to_datetime(df2['selling_date'])
         GROUP_FREQ = ''
         if date_group == 'Month':
-            GROUP_FREQ = 'M'
+            GROUP_FREQ = 'ME'
         elif date_group == 'Quarter':
             GROUP_FREQ = 'QS'
         else:
