@@ -115,6 +115,14 @@ try:
         fig = pgo.Figure(data=[bar1, bar2])
         st.plotly_chart(fig)
 
+        expander = st.expander("Underlying Data")
+        expander.write("Computed Bin Values")
+        expander.table([x, df1_bins, df2_bins])
+        expander.write("Full Dataset Period 1")
+        expander.dataframe(df1)
+        expander.write("Full Dataset Period 2")
+        expander.dataframe(df2)
+
 
 except Exception as e:
     st.error(e)

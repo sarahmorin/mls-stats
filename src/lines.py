@@ -58,7 +58,7 @@ try:
         elif len(county) == 1:
             if county[0] == "San Francisco":
                 group = "district"
-                where += " AND city=\'San Francisco\'"
+                where += " AND city=\'San Francisco\' AND district != \'SF District 10\'"
             else:
                 group = "city"
                 where += f" AND county=\'{county[0]}\'"
@@ -87,32 +87,36 @@ try:
         grouper = pd.Grouper(key='selling_date', freq=GROUP_FREQ)
 
         if metric == AVG_PRICE:
-            df_avg = df.groupby([group, grouper])['selling_price'].mean().reset_index(name='col')
-            fig = make_plot(df_avg, group, GROUP_FREQ, "Average Price")
+            df_stat = df.groupby([group, grouper])['selling_price'].mean().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Average Price")
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == MED_PRICE:
-            df_med = df.groupby([group, grouper])['selling_price'].median().reset_index(name='col')
-            fig = make_plot(df_med, group, GROUP_FREQ, "Median Price")
+            df_stat = df.groupby([group, grouper])['selling_price'].median().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Median Price")
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_LIST:
-            df_ratio = df.groupby([group, grouper])['sale_over_list'].mean().reset_index(name='col')
-            fig = make_plot(df_ratio, group, GROUP_FREQ, "Sale Price as % of List Price")
+            df_stat = df.groupby([group, grouper])['sale_over_list'].mean().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Sale Price as % of List Price")
             fig.update_layout(yaxis_tickformat=".0%")
         elif metric == PPSF:
-            df_ppsf = df.groupby([group, grouper])['sppsf'].mean().reset_index(name='col')
-            fig = make_plot(df_ppsf, group, GROUP_FREQ, "Average Price/Sq.Ft.")
+            df_stat = df.groupby([group, grouper])['sppsf'].mean().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Average Price/Sq.Ft.")
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_CNT:
-            df_sales = df.groupby([group, grouper])['listing_number'].count().reset_index(name='col')
-            fig = make_plot(df_sales, group, GROUP_FREQ, "Number of Sales")
+            df_stat = df.groupby([group, grouper])['listing_number'].count().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Number of Sales")
         elif metric == AVG_DOM:
             df_dom = df.groupby([group, grouper])['dom'].mean().reset_index(name='col')
             fig = make_plot(df_dom, group, GROUP_FREQ, "Average Days on Market")
         elif metric == SALE_ASK:
-            df_sol = df.query('selling_price > listing_price').groupby([group, grouper])['listing_number'].count().reset_index(name='col')
-            fig = make_plot(df_sol, group, GROUP_FREQ, "Sales over Asking")
+            df_stat = df.query('selling_price > listing_price').groupby([group, grouper])['listing_number'].count().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Sales over Asking")
         else:
             raise Exception("Unsupported metric")
         st.plotly_chart(fig)
+
+        expander = st.expander("Underlying Data")
+        expander.dataframe(df_stat)
+
 except Exception as e:
     st.error(e)

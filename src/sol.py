@@ -58,8 +58,8 @@ try:
         elif len(county) == 1:
             if county[0] == "San Francisco":
                 group = "district"
-                where1 += " AND city=\'San Francisco\'"
-                where2 += " AND city=\'San Francisco\'"
+                where1 += " AND city=\'San Francisco\' AND district != \'SF District 10\'"
+                where2 += " AND city=\'San Francisco\' AND district != \'SF District 10\'"
             else:
                 group = "city"
                 where1 += f" AND county=\'{county[0]}\'"
@@ -88,6 +88,12 @@ try:
         bar2 = pgo.Bar(x=df2[group], y=df2['perc'], text=df2['perc'], name=t2_str, marker_color=t2_color)
         fig = pgo.Figure(data=[bar1, bar2])
         st.plotly_chart(fig)
+
+        expander = st.expander("Underlying Data")
+        expander.write("Data Time Period 1")
+        expander.dataframe(df1)
+        expander.write("Data Time Period 2")
+        expander.dataframe(df2)
 
 except Exception as e:
     st.error(e)

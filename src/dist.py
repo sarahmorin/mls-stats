@@ -62,5 +62,8 @@ try:
         fig.add_annotation(x=max_price, y=1, text=f"${max_price:,}", showarrow=False, yshift=30)
         st.plotly_chart(fig)
 
+        expander = st.expander("Underlying Data")
+        expander.dataframe(df)
+
 except Exception as e:
     st.error(e)

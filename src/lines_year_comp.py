@@ -101,41 +101,47 @@ try:
         grouper = pd.Grouper(key='selling_date', freq=GROUP_FREQ)
 
         if metric == AVG_PRICE:
-            df1_avg = df1.groupby(grouper)['selling_price'].mean().reset_index(name='col')
-            df2_avg = df2.groupby(grouper)['selling_price'].mean().reset_index(name='col')
-            fig = make_plot(df1_avg, df2_avg, GROUP_FREQ, year1, year2, t1_color, t2_color, "Average Price")
+            df1_stat = df1.groupby(grouper)['selling_price'].mean().reset_index(name='col')
+            df2_stat = df2.groupby(grouper)['selling_price'].mean().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "Average Price")
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == MED_PRICE:
-            df1_med = df1.groupby(grouper)['selling_price'].median().reset_index(name='col')
-            df2_med = df2.groupby(grouper)['selling_price'].median().reset_index(name='col')
-            fig = make_plot(df1_med, df2_med, GROUP_FREQ, year1, year2, t1_color, t2_color, "Median Price")
+            df1_stat = df1.groupby(grouper)['selling_price'].median().reset_index(name='col')
+            df2_stat = df2.groupby(grouper)['selling_price'].median().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "Median Price")
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_LIST:
-            df1_ratio = df1.groupby(grouper)['sale_over_list'].mean().reset_index(name='col')
-            df2_ratio = df2.groupby(grouper)['sale_over_list'].mean().reset_index(name='col')
-            fig = make_plot(df1_ratio, df2_ratio, GROUP_FREQ, year1, year2, t1_color, t2_color, "Sale Price as % of List Price")
+            df1_stat = df1.groupby(grouper)['sale_over_list'].mean().reset_index(name='col')
+            df2_stat = df2.groupby(grouper)['sale_over_list'].mean().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "Sale Price as % of List Price")
             fig.update_layout(yaxis_tickformat=".0%")
         elif metric == PPSF:
-            df1_ppsf = df1.groupby(grouper)['sppsf'].mean().reset_index(name='col')
-            df2_ppsf = df2.groupby(grouper)['sppsf'].mean().reset_index(name='col')
-            fig = make_plot(df1_ppsf, df2_ppsf, GROUP_FREQ, year1, year2, t1_color, t2_color, "Average Price/SF")
+            df1_stat = df1.groupby(grouper)['sppsf'].mean().reset_index(name='col')
+            df2_stat = df2.groupby(grouper)['sppsf'].mean().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "Average Price/SF")
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_CNT:
-            df1_sales = df1.groupby(grouper)['listing_number'].count().reset_index(name='col')
-            df2_sales = df2.groupby(grouper)['listing_number'].count().reset_index(name='col')
-            fig = make_plot(df1_sales, df2_sales, GROUP_FREQ, year1, year2, t1_color, t2_color, "Homes Sold")
+            df1_stat = df1.groupby(grouper)['listing_number'].count().reset_index(name='col')
+            df2_stat = df2.groupby(grouper)['listing_number'].count().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "Homes Sold")
         elif metric == AVG_DOM:
-            df1_dom = df1.groupby(grouper)['dom'].mean().reset_index(name='col')
-            df2_dom = df2.groupby(grouper)['dom'].mean().reset_index(name='col')
-            fig = make_plot(df1_dom, df2_dom, GROUP_FREQ, year1, year2, t1_color, t2_color, "Average Days on Market")
+            df1_stat = df1.groupby(grouper)['dom'].mean().reset_index(name='col')
+            df2_stat = df2.groupby(grouper)['dom'].mean().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "Average Days on Market")
         elif metric == SALE_ASK:
-            df1_sol = df1.query('selling_price > listing_price').groupby(grouper)['listing_number'].count().reset_index(name='col')
-            df2_sol = df2.query('selling_price > listing_price').groupby(grouper)['listing_number'].count().reset_index(name='col')
-            fig = make_plot(df1_sol, df2_sol, GROUP_FREQ, year1, year2, t1_color, t2_color, "No. Sales over Asking")
+            df1_stat = df1.query('selling_price > listing_price').groupby(grouper)['listing_number'].count().reset_index(name='col')
+            df2_stat = df2.query('selling_price > listing_price').groupby(grouper)['listing_number'].count().reset_index(name='col')
+            fig = make_plot(df1_stat, df2_stat, GROUP_FREQ, year1, year2, t1_color, t2_color, "No. Sales over Asking")
         else:
             raise Exception("Unsupported Metric")
 
         st.plotly_chart(fig)
+
+        expander = st.expander("Underlying Data")
+        expander.write("Year 1")
+        expander.dataframe(df1_stat)
+        expander.write("Year 2")
+        expander.dataframe(df2_stat)
 
 except Exception as e:
     st.error(e)
