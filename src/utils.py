@@ -25,6 +25,25 @@ DARK_GREY="#67737a"
 GOLD1="#a08525"
 GOLD2="#c29b40"
 
+# Metric Strings
+AVG_PRICE = "Average Sale Price"
+MED_PRICE = "Median Sale Price"
+PPSF = "Average Price/Sq.Ft."
+SALE_CNT = "Number of Sales"
+SALE_LIST = "Sale Price as % of List Price"
+AVG_DOM = "Average Days on Market"
+SALE_ASK = "Sales over Asking"
+
+def get_line_styles():
+    colors = [BLUE, GOLD1, LIGHT_GREY]
+    dashes = ['solid', 'dash', 'dot', 'longdash', 'dashdot', 'longdashdot']
+    line_styles = []
+    for d in dashes:
+        for c in colors:
+            line_styles.append({'color': c, 'dash': d})
+
+    return line_styles
+
 def q_to_date_range(q, year):
     if q == 1:
         return dt.date(year, 1, 1), dt.date(year, 3, 31)
@@ -72,11 +91,17 @@ def group_input(title="Group By"):
 def year_input(title="Year"):
     return st.selectbox(title, list(range(dt.date.today().year, 1900, -1)))
 
+def date_group_input(title="Group By"):
+    return st.selectbox(title, ['Month', 'Quarter', 'Year'])
+
 def county_input(title="County"):
     conn = st.connection("mls_db")
     df = conn.query("SELECT DISTINCT county FROM listings")
     return st.multiselect(title, df, [],
                           help="Select county(s)")
+
+def metric_input(title="Graph Metric"):
+    return st.selectbox(title, [AVG_PRICE, MED_PRICE, PPSF, SALE_CNT, SALE_LIST, AVG_DOM, SALE_ASK])
 
 def no_data(opt=None, stop=True):
     if opt:
@@ -93,3 +118,30 @@ def download(df, label="Download Data as CSV", name="mls-data.csv"):
             data=df.to_csv().encode("utf-8"),
             file_name=name,
             mime="text/csv")
+
+def county_info():
+    expander = st.expander("When selecting the county...", icon=":material/info:")
+    expander.write("""
+                    * San Francisco only will produce a table/graph grouped by SF Districts
+                    * Selecting no county will produce a table/graph of all counties grouped by county
+                    * Any other choices will produce a table/graph grouped by city
+                   """)
+
+def to_month(d):
+    return d.strftime("%b")
+
+def to_quarter(d):
+    s = d.strftime("%b")
+    s = s.replace('Jan', 'Q1')
+    s = s.replace('Apr', 'Q2')
+    s = s.replace('Jul', 'Q3')
+    s = s.replace('Oct', 'Q4')
+    return s
+
+def to_quarter_year(d):
+    s = d.strftime("%b %Y")
+    s = s.replace('Jan', 'Q1')
+    s = s.replace('Apr', 'Q2')
+    s = s.replace('Jul', 'Q3')
+    s = s.replace('Oct', 'Q4')
+    return s
