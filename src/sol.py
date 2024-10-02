@@ -18,8 +18,6 @@ try:
     st.title("Q vs. Q Sales over List Price")
     st.write("Generate a bar graph comparing percentage of sales over list price for 2 quarters.")
 
-    county_info()
-
     with st.form(key='form'):
         # Data Filters
         st.subheader("Search Criteria")

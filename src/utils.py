@@ -98,7 +98,11 @@ def county_input(title="County"):
     conn = st.connection("mls_db")
     df = conn.query("SELECT DISTINCT county FROM listings")
     return st.multiselect(title, df, [],
-                          help="Select county(s)")
+                          help="""
+                    * San Francisco only will produce a table/graph grouped by SF Districts
+                    * Any other single county will produce a table/graph grouped by city
+                    * Selecting no county or multiple counties will produce a table/graph grouped by county
+                          """)
 
 def metric_input(title="Graph Metric"):
     return st.selectbox(title, [AVG_PRICE, MED_PRICE, PPSF, SALE_CNT, SALE_LIST, AVG_DOM, SALE_ASK])

@@ -19,8 +19,6 @@ try:
     st.write("""Generate a table comparing median price, price/sf, and number of sales for 2 given
              quarters.""")
 
-    county_info()
-
     with st.form(key='form'):
         # Data Filters
         st.subheader("Search Criteria")

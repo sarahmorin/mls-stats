@@ -17,8 +17,6 @@ try:
     st.title("Single Date Range Table")
     st.write("Generate a table comparing sale price statistics for a given quarter.")
 
-    county_info()
-
     with st.form(key='form'):
         # Data Filters
         d1, d2 = date_input()
