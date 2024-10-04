@@ -58,7 +58,7 @@ try:
         elif len(county) == 1:
             if county[0] == "San Francisco":
                 group = "district"
-                where += " AND city=\'San Francisco\' AND district != \'SF District 10\'"
+                where += " AND city=\'San Francisco\'"
             else:
                 group = "city"
                 where += f" AND county=\'{county[0]}\'"
@@ -106,8 +106,8 @@ try:
             df_stat = df.groupby([group, grouper])['listing_number'].count().reset_index(name='col')
             fig = make_plot(df_stat, group, GROUP_FREQ, "Number of Sales")
         elif metric == AVG_DOM:
-            df_dom = df.groupby([group, grouper])['dom'].mean().reset_index(name='col')
-            fig = make_plot(df_dom, group, GROUP_FREQ, "Average Days on Market")
+            df_stat = df.groupby([group, grouper])['dom'].mean().reset_index(name='col')
+            fig = make_plot(df_stat, group, GROUP_FREQ, "Average Days on Market")
         elif metric == SALE_ASK:
             df_stat = df.query('selling_price > listing_price').groupby([group, grouper])['listing_number'].count().reset_index(name='col')
             fig = make_plot(df_stat, group, GROUP_FREQ, "Sales over Asking")

@@ -22,8 +22,8 @@ SF_DIST_SORT = {
 BLUE="#002349"
 LIGHT_GREY="#adadad"
 DARK_GREY="#67737a"
-GOLD1="#a08525"
-GOLD2="#c29b40"
+GOLD2="#a08525"
+GOLD1="#c29b40"
 
 # Metric Strings
 AVG_PRICE = "Average Sale Price"
