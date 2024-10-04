@@ -3,4 +3,5 @@ pandas
 plotly
 streamlit-extras
 sqlalchemy
+sqlalchemy-sqlitecloud
 sqlitecloud
