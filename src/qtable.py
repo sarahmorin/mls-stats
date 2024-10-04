@@ -46,7 +46,7 @@ try:
         submit_button = st.form_submit_button("Generate Table")
 
     if submit_button:
-        conn = st.connection("mls_db")
+        conn = db_conn()
         date_range1 = where_date_range('selling_date', d11, d12)
         date_range2 = where_date_range('selling_date', d21, d22)
         where1 = f"WHERE {date_range1}"
@@ -77,8 +77,8 @@ try:
         query2 = f"SELECT * FROM listings {where2}"
 
         # Get data and compute summary stats
-        df1 = conn.query(query1)
-        df2 = conn.query(query2)
+        df1 = pd.read_sql(query1, conn)
+        df2 = pd.read_sql(query2, conn)
 
         if df1.empty:
             no_data(t1_str)

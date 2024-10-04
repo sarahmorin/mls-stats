@@ -7,6 +7,7 @@ import sqlite3 as sq
 import streamlit as st
 import pandas as pd
 
+from sqlalchemy import create_engine
 # ===============================================
 # Data Processing Functions
 # -----------------------------------------------
@@ -94,7 +95,7 @@ try:
         if len(upload_file) == 0:
             st.warning("Please select a file to upload")
         else:
-            conn = st.connection("mls_db")
+            engine = create_engine(st.secrets["DB_CONN"])
             county_df = pd.read_csv('county_key.csv')   #FIXME: hardcoded
             for f in upload_file:
                 df = pd.read_csv(f,
@@ -155,23 +156,23 @@ try:
                 df['sale_over_list'] = df.apply(get_sale_over_list, axis=1)
 
                 # Convert to SQL
-                df.to_sql('listings', conn.engine, if_exists='append', index=False)
+                df.to_sql('listings', engine, if_exists='append', index=False, chunksize=500)
 
             # Print Success
             st.cache_data.clear()
             st.success("New data successfully uploaded")
 
     # Reset Button
-    with st.expander("Reset Database"):
-        st.error("WARNING: This cannot be undone")
-        st.write("""If you want to reset the database - i.e. delete all the data and start fresh,
-        press the button bellow. This is a permanent operation that cannot be undone. Only do this
-        if you are absolutely certain.""")
-
-        if st.button("Reset Database"):
-            create_db()
-            st.cache_data.clear()
-
+    # with st.expander("Reset Database"):
+    #     st.error("WARNING: This cannot be undone")
+    #     st.write("""If you want to reset the database - i.e. delete all the data and start fresh,
+    #     press the button bellow. This is a permanent operation that cannot be undone. Only do this
+    #     if you are absolutely certain.""")
+    #
+    #     if st.button("Reset Database"):
+    #         create_db()
+    #         st.cache_data.clear()
+    #
 
 except Exception as e:
     st.error("Failed to upload data. Make sure `.csv` file is the correct format")

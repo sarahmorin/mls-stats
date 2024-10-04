@@ -18,6 +18,7 @@ high_end_page = st.Page("he_sale.py", title="Q vs. Q Sale Distribution")
 sale_over_list_page = st.Page("sol.py", title="Bar: Q vs. Q % Sales over List")
 line_page = st.Page("lines.py", title="Line Graph: X over time")
 line_year_page = st.Page("lines_year_comp.py", title="Line Graphs: Change in X year over year")
+line_sf_page = st.Page("lines_year_sf.py", title="Line Graphs: Change in X year over year SF District")
 
 # ===============================================
 
@@ -29,7 +30,7 @@ pg = st.navigation(
     {
         "": [home_page],
         "Tables": [table_page, q_table_page],
-        "Graphs": [sale_over_list_page, line_page, line_year_page],
+        "Graphs": [sale_over_list_page, line_page, line_year_page, line_sf_page],
         "Distributions": [sale_dist_page, high_end_page],
         "Database": [upload_page, browse_page, county_page],
     }

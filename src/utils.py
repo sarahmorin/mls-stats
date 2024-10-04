@@ -4,6 +4,8 @@
 
 import datetime as dt
 import streamlit as st
+import pandas as pd
+import sqlitecloud
 
 SF_DIST_SORT = {
         'SF District 1': 0,
@@ -33,6 +35,9 @@ SALE_CNT = "Number of Sales"
 SALE_LIST = "Sale Price as % of List Price"
 AVG_DOM = "Average Days on Market"
 SALE_ASK = "Sales over Asking"
+
+def db_conn():
+    return sqlitecloud.connect(st.secrets["DB_CONN"])
 
 def get_line_styles():
     colors = [BLUE, GOLD1, LIGHT_GREY]
@@ -95,8 +100,8 @@ def date_group_input(title="Group By"):
     return st.selectbox(title, ['Month', 'Quarter', 'Year'])
 
 def county_input(title="County"):
-    conn = st.connection("mls_db")
-    df = conn.query("SELECT DISTINCT county FROM listings")
+    conn = db_conn()
+    df = pd.read_sql("SELECT DISTINCT county FROM listings", conn)
     return st.multiselect(title, df, [],
                           help="""
                     * San Francisco only will produce a table/graph grouped by SF Districts

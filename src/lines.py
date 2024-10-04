@@ -44,7 +44,7 @@ try:
         submit_button = st.form_submit_button("Generate Graph")
 
     if submit_button:
-        conn = st.connection("mls_db")
+        conn = db_conn()
 
         # Construct Query
         date_range = where_date_range('selling_date', d1, d2)
@@ -69,7 +69,7 @@ try:
         query = f"SELECT * FROM listings {where}"
 
         # Get data
-        df = conn.query(query)
+        df = pd.read_sql(query, conn)
 
         if df.empty:
             no_data()

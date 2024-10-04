@@ -6,13 +6,15 @@
 import warnings
 import streamlit as st
 import pandas as pd
+import sqlitecloud
 from streamlit_extras.dataframe_explorer import dataframe_explorer
+from sqlalchemy import create_engine
 
 
 try:
     # Connect to DB and get all data
-    conn = st.connection('mls_db')
-    df = conn.query("SELECT * FROM listings")
+    conn = create_engine(st.secrets["DB_CONN"])
+    df = pd.read_sql("SELECT * FROM listings", conn)
 
 
     # Display Data as Table

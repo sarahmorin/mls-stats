@@ -6,6 +6,7 @@
 #pylint: disable=broad-exception-caught
 
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as pgo
 
 from utils import *
@@ -27,7 +28,7 @@ try:
         submit_button = st.form_submit_button("Generate Graph")
 
     if submit_button:
-        conn = st.connection("mls_db")
+        conn = db_conn()
         date_range = where_date_range('selling_date', d1, d2)
         where = f"WHERE {date_range}"
         if ptype != "Any":
@@ -40,7 +41,7 @@ try:
 
         query = f"SELECT * FROM listings {where}"
 
-        df = conn.query(query)
+        df = pd.read_sql(query, conn)
         if df.empty:
             no_data()
 

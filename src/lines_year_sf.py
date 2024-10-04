@@ -36,7 +36,7 @@ try:
         with c2:
             year2 = year_input("Year 2")
         ptype = ptype_input()
-        county = county_input()
+        dist = st.selectbox("District", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         date_group = date_group_input()
         metric = metric_input()
 
@@ -64,16 +64,8 @@ try:
             where1 += f" AND {where_ptype(ptype)}"
             where2 += f" AND {where_ptype(ptype)}"
 
-        if len(county) == 1:
-            if county[0] == "San Francisco":
-                where1 += " AND city =\'San Francisco\'"
-                where2 += " AND city =\'San Francisco\'"
-            else:
-                where1 += f" AND county =\'{county[0]}\'"
-                where2 += f" AND county =\'{county[0]}\'"
-        elif len(county) > 0:
-            where1 += f" AND county IN {tuple(county)}"
-            where2 += f" AND county IN {tuple(county)}"
+        where1 += f" AND city =\'San Francisco\' AND district =\'SF District {dist}\'"
+        where2 += f" AND city =\'San Francisco\' AND district =\'SF District {dist}\'"
 
         query1 = f"SELECT * FROM listings {where1}"
         query2 = f"SELECT * FROM listings {where2}"
