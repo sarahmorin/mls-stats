@@ -5,7 +5,8 @@
 import datetime as dt
 import streamlit as st
 import pandas as pd
-import sqlitecloud
+
+from sqlalchemy import create_engine
 
 SF_DIST_SORT = {
         'SF District 1': 0,
@@ -37,7 +38,8 @@ AVG_DOM = "Average Days on Market"
 SALE_ASK = "Sales over Asking"
 
 def db_conn():
-    return sqlitecloud.connect(st.secrets["DB_CONN"])
+    # return sqlitecloud.connect(st.secrets["DB_CONN"])
+    return create_engine(st.secrets["DB_CONN"])
 
 def get_line_styles():
     colors = [BLUE, GOLD1, LIGHT_GREY]
