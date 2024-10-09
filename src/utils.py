@@ -111,6 +111,13 @@ def county_input(title="County"):
                     * Selecting no county or multiple counties will produce a table/graph grouped by county
                           """)
 
+def sf_dist_input(title="Group SF by District"):
+    return st.checkbox(title, help="""If you have selected **only San Francisco** as a County
+                       above, this checkbox allows you to choose between a line graph for all 10
+                       districts and a graph with a single line for SF. If you have not selected
+                       SF above or have selected SF in a group of counties, this checkbox does
+                       nothing.""")
+
 def metric_input(title="Graph Metric"):
     return st.selectbox(title, [AVG_PRICE, MED_PRICE, PPSF, SALE_CNT, SALE_LIST, AVG_DOM, SALE_ASK])
 

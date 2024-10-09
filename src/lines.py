@@ -40,6 +40,7 @@ try:
         d1, d2 = date_input()
         ptype = ptype_input()
         county = county_input()
+        sf_by_dist = sf_dist_input()
         date_group = date_group_input()
         metric = metric_input()
 
@@ -59,8 +60,11 @@ try:
             group = "county"
         elif len(county) == 1:
             if county[0] == "San Francisco":
-                group = "district"
                 where += " AND city=\'San Francisco\'"
+                if sf_by_dist:
+                    group = "district"
+                else:
+                    group = "county"
             else:
                 group = "city"
                 where += f" AND county=\'{county[0]}\'"
