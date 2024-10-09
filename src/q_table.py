@@ -70,7 +70,7 @@ try:
         else:
             where1 += f" AND county IN {tuple(county)}"
             where2 += f" AND county IN {tuple(county)}"
-            group = "city"
+            group = "county"
 
         # Construct query
         query1 = f"SELECT * FROM listings {where1}"

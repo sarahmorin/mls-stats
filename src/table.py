@@ -62,7 +62,7 @@ try:
                 where += f" AND county=\'{county[0]}\'"
         else:
             where += f" AND county IN {tuple(county)}"
-            group = "city"
+            group = "county"
 
         # Construct query
         query = f"SELECT * FROM listings {where}"
@@ -78,7 +78,7 @@ try:
         df_max = df.groupby(group)['selling_price'].max().reset_index(name='High Sale')
         df_sppsf = df.groupby(group)['sppsf'].mean().reset_index(name='Sale Price/SF')
         df_sales = df.groupby(group)['selling_price'].count().reset_index(name='# of Sales')
-        df_dom = df.groupby(group)['dom'].mean().reset_index(name='DOM')
+        df_dom = df.groupby(group)['dom'].mean().reset_index(name='Avg. Days on Market')
         df_over_ask = df.query('selling_price > listing_price').groupby(group)['selling_price'].count().reset_index(name='# Sales Over Asking')
 
         df_stats = pd.DataFrame(df_avg[group])
@@ -116,8 +116,8 @@ try:
         if include_dom:
             df_stats = pd.merge(df_stats, df_dom, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'DOM'] = df['dom'].mean()
-            df_stats['DOM'] = df_stats['DOM'].map("{:.0f}".format)
+                df_stats.loc[df_stats[group] == 'Summary', 'Avg. Days on Market'] = df['dom'].mean()
+            df_stats['Avg. Days on Market'] = df_stats['Avg. Days on Market'].map("{:.0f}".format)
         if include_sale_over_ask:
             df_stats = pd.merge(df_stats, df_over_ask, on=group, how='left')
             if include_agg_row:
