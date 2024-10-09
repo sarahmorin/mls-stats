@@ -34,7 +34,7 @@ MED_PRICE = "Median Sale Price"
 PPSF = "Average Price/Sq.Ft."
 SALE_CNT = "Number of Sales"
 SALE_LIST = "Sale Price as % of List Price"
-AVG_DOM = "Average Days on Market"
+AVG_DOM = "Avg. Days on Market"
 SALE_ASK = "Sales over Asking"
 
 def db_conn():
@@ -92,14 +92,17 @@ def ptype_input(include_all=True):
         pytpes.insert(0, "Any")
     return st.selectbox("Property Type", pytpes)
 
-def group_input(title="Group By"):
-    return st.selectbox(title, ["District (SF)", "City", "County"])
-
 def year_input(title="Year"):
     return st.selectbox(title, list(range(dt.date.today().year, 1900, -1)))
 
 def date_group_input(title="Group By"):
-    return st.selectbox(title, ['Month', 'Quarter', 'Year'])
+    return st.selectbox(title, ['Month', 'Quarter', 'Year'],
+                        help="""How data is grouped by date along the x-axis. For
+                        example: Grouping by
+                        month will produce one data point per month for each line. ***Note: If
+                        the date range is too small not all of these groupings make sense. For
+                        example, grouping by year on a date range that spans a single quarter
+                        is not useful.***""")
 
 def county_input(title="County"):
     conn = db_conn()
@@ -119,7 +122,19 @@ def sf_dist_input(title="Group SF by District"):
                        nothing.""")
 
 def metric_input(title="Graph Metric"):
-    return st.selectbox(title, [AVG_PRICE, MED_PRICE, PPSF, SALE_CNT, SALE_LIST, AVG_DOM, SALE_ASK])
+    return st.selectbox(title, [AVG_PRICE, MED_PRICE, PPSF, SALE_CNT, SALE_LIST, AVG_DOM,
+                                SALE_ASK],
+                        help=f"""
+                        Select the metric represented in the graph.
+                        * {AVG_PRICE}: sum of all sale prices divided by number of sales.
+                        * {MED_PRICE}: middle sale price when sale prices are sorted from least
+                        to greatest.
+                        * {PPSF}: (sum of all sale price / sq.ft.) divided by number of sales.
+                        * {SALE_CNT}: total number of sales.
+                        * {SALE_LIST}: Average of Sales Price as % of List Price.
+                        * {AVG_DOM}: Sum of all days on market divided by number of sales.
+                        * {SALE_ASK}: Number of sales with sale price > list price.
+                        """)
 
 def no_data(opt=None, stop=True):
     if opt:
