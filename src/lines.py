@@ -19,6 +19,8 @@ def make_plot(df, group, freq, title):
     elif freq == 'QS':
         df['selling_date'] = df['selling_date'].map(to_quarter_year)
     df_dict = dict(list(df.groupby(group)))
+    if group == "district":
+        df_dict = dict(sorted(list(df.groupby(group)), key=lambda x: SF_DIST_SORT[x[0]]))
     line_style_idx = 0
     fig = pgo.Figure(layout={'title':title})
     for k,v in df_dict.items():
