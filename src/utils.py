@@ -19,7 +19,8 @@ SF_DIST_SORT = {
         'SF District 8': 7,
         'SF District 9': 8,
         'SF District 10': 9,
-        'Summary': 10,
+        'San Francisco': 10,
+        'Summary': None,
         }
 
 BLUE="#002349"

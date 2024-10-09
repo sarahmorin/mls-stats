@@ -123,8 +123,7 @@ try:
             if include_agg_row:
                 df_stats.loc[df_stats[group] == 'Summary', SALE_ASK] = df_stats[SALE_ASK].sum()
 
-        if group == "district":
-            df_stats = df_stats.sort_values(by=['district'], key=lambda x: x.map(SF_DIST_SORT))
+        df_stats = df_stats.sort_values(by=[group], key=lambda x: x.map(SF_DIST_SORT))
 
         df_stats.rename(columns={'district': 'District', 'county': 'County', 'city':'City'},
                         inplace=True)
