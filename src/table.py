@@ -28,17 +28,17 @@ try:
         st.subheader("Include Columns:")
         cols = st.columns(4)
         with cols[0]:
-            include_avg_price = st.checkbox("Average Price", value=True)
-            include_ppsf = st.checkbox("Price/SF", value=True)
+            include_avg_price = st.checkbox(AVG_PRICE, value=True)
+            include_ppsf = st.checkbox(PPSF, value=True)
         with cols[1]:
-            include_med_price = st.checkbox("Median Price", value=True)
-            include_num = st.checkbox("No. of Sales", value=True)
+            include_med_price = st.checkbox(MED_PRICE, value=True)
+            include_num = st.checkbox(SALE_CNT, value=True)
         with cols[2]:
-            include_sale_list = st.checkbox("Sale/List Price", value=True)
-            include_dom = st.checkbox("DOM", value=True)
+            include_sale_list = st.checkbox(SALE_LIST, value=True)
+            include_dom = st.checkbox(AVG_DOM, value=True)
         with cols[3]:
-            include_max = st.checkbox("High Sale", value=True)
-            include_sale_over_ask = st.checkbox("Sales Over Asking", value=True)
+            include_max = st.checkbox(SALE_MAX, value=True)
+            include_sale_over_ask = st.checkbox(SALE_ASK, value=True)
 
         submit_button = st.form_submit_button("Generate Table")
 
@@ -72,14 +72,14 @@ try:
         if df.empty:
             no_data()
 
-        df_avg = df.groupby(group)['selling_price'].mean().reset_index(name='Average Sale Price')
-        df_med = df.groupby(group)['selling_price'].median().reset_index(name='Median Sale Price')
-        df_ratio = df.groupby(group)['sale_over_list'].mean().reset_index(name='Sale/List Price')
-        df_max = df.groupby(group)['selling_price'].max().reset_index(name='High Sale')
-        df_sppsf = df.groupby(group)['sppsf'].mean().reset_index(name='Sale Price/SF')
-        df_sales = df.groupby(group)['selling_price'].count().reset_index(name='# of Sales')
-        df_dom = df.groupby(group)['dom'].mean().reset_index(name='Avg. Days on Market')
-        df_over_ask = df.query('selling_price > listing_price').groupby(group)['selling_price'].count().reset_index(name='# Sales Over Asking')
+        df_avg = df.groupby(group)['selling_price'].mean().reset_index(name=AVG_PRICE)
+        df_med = df.groupby(group)['selling_price'].median().reset_index(name=MED_PRICE)
+        df_ratio = df.groupby(group)['sale_over_list'].mean().reset_index(name=SALE_LIST)
+        df_max = df.groupby(group)['selling_price'].max().reset_index(name=SALE_MAX)
+        df_sppsf = df.groupby(group)['sppsf'].mean().reset_index(name=PPSF)
+        df_sales = df.groupby(group)['selling_price'].count().reset_index(name=SALE_CNT)
+        df_dom = df.groupby(group)['dom'].mean().reset_index(name=AVG_DOM)
+        df_over_ask = df.query('selling_price > listing_price').groupby(group)['selling_price'].count().reset_index(name=SALE_ASK)
 
         df_stats = pd.DataFrame(df_avg[group])
         if include_agg_row:
@@ -87,41 +87,41 @@ try:
         if include_avg_price:
             df_stats = pd.merge(df_stats, df_avg, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'Average Sale Price'] = df['selling_price'].mean()
-            df_stats['Average Sale Price'] = df_stats['Average Sale Price'].map("${:,.0f}".format)
+                df_stats.loc[df_stats[group] == 'Summary', AVG_PRICE] = df['selling_price'].mean()
+            df_stats[AVG_PRICE] = df_stats[AVG_PRICE].map("${:,.0f}".format)
         if include_med_price:
             df_stats = pd.merge(df_stats, df_med, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'Median Sale Price'] = df['selling_price'].median()
-            df_stats['Median Sale Price'] = df_stats['Median Sale Price'].map("${:,.0f}".format)
+                df_stats.loc[df_stats[group] == 'Summary', MED_PRICE] = df['selling_price'].median()
+            df_stats[MED_PRICE] = df_stats[MED_PRICE].map("${:,.0f}".format)
         if include_sale_list:
             df_stats = pd.merge(df_stats, df_ratio, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'Sale/List Price'] = df['sale_over_list'].mean()
-            df_stats['Sale/List Price'] = df_stats['Sale/List Price'].map("{:.0%}".format)
+                df_stats.loc[df_stats[group] == 'Summary', SALE_LIST] = df['sale_over_list'].mean()
+            df_stats[SALE_LIST] = df_stats[SALE_LIST].map("{:.0%}".format)
         if include_max:
             df_stats = pd.merge(df_stats, df_max, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'High Sale'] = df['selling_price'].max()
-            df_stats['High Sale'] = df_stats['High Sale'].map("${:,.0f}".format)
+                df_stats.loc[df_stats[group] == 'Summary', SALE_MAX] = df['selling_price'].max()
+            df_stats[SALE_MAX] = df_stats[SALE_MAX].map("${:,.0f}".format)
         if include_ppsf:
             df_stats = pd.merge(df_stats, df_sppsf, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'Sale Price/SF'] = df['sppsf'].mean()
-            df_stats['Sale Price/SF'] = df_stats['Sale Price/SF'].map("${:,.0f}".format)
+                df_stats.loc[df_stats[group] == 'Summary', PPSF] = df['sppsf'].mean()
+            df_stats[PPSF] = df_stats[PPSF].map("${:,.0f}".format)
         if include_num:
             df_stats = pd.merge(df_stats, df_sales, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', '# of Sales'] = df_stats['# of Sales'].sum()
+                df_stats.loc[df_stats[group] == 'Summary', SALE_CNT] = df_stats[SALE_CNT].sum()
         if include_dom:
             df_stats = pd.merge(df_stats, df_dom, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', 'Avg. Days on Market'] = df['dom'].mean()
-            df_stats['Avg. Days on Market'] = df_stats['Avg. Days on Market'].map("{:.0f}".format)
+                df_stats.loc[df_stats[group] == 'Summary', AVG_DOM] = df['dom'].mean()
+            df_stats[AVG_DOM] = df_stats[AVG_DOM].map("{:.0f}".format)
         if include_sale_over_ask:
             df_stats = pd.merge(df_stats, df_over_ask, on=group, how='left')
             if include_agg_row:
-                df_stats.loc[df_stats[group] == 'Summary', '# Sales Over Asking'] = df_stats['# Sales Over Asking'].sum()
+                df_stats.loc[df_stats[group] == 'Summary', SALE_ASK] = df_stats[SALE_ASK].sum()
 
         if group == "district":
             df_stats = df_stats.sort_values(by=['district'], key=lambda x: x.map(SF_DIST_SORT))

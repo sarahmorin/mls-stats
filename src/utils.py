@@ -36,6 +36,7 @@ SALE_CNT = "Number of Sales"
 SALE_LIST = "Sale Price as % of List Price"
 AVG_DOM = "Avg. Days on Market"
 SALE_ASK = "Sales over Asking"
+SALE_MAX = "High Sale"
 
 def db_conn():
     # return sqlitecloud.connect(st.secrets["DB_CONN"])

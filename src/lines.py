@@ -94,29 +94,29 @@ try:
 
         if metric == AVG_PRICE:
             df_stat = df.groupby([group, grouper])['selling_price'].mean().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Average Price")
+            fig = make_plot(df_stat, group, GROUP_FREQ, AVG_PRICE)
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == MED_PRICE:
             df_stat = df.groupby([group, grouper])['selling_price'].median().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Median Price")
+            fig = make_plot(df_stat, group, GROUP_FREQ, MED_PRICE)
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_LIST:
             df_stat = df.groupby([group, grouper])['sale_over_list'].mean().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Sale Price as % of List Price")
+            fig = make_plot(df_stat, group, GROUP_FREQ, SALE_LIST)
             fig.update_layout(yaxis_tickformat=".0%")
         elif metric == PPSF:
             df_stat = df.groupby([group, grouper])['sppsf'].mean().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Average Price/Sq.Ft.")
+            fig = make_plot(df_stat, group, GROUP_FREQ, PPSF)
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_CNT:
             df_stat = df.groupby([group, grouper])['listing_number'].count().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Number of Sales")
+            fig = make_plot(df_stat, group, GROUP_FREQ, SALE_CNT)
         elif metric == AVG_DOM:
             df_stat = df.groupby([group, grouper])['dom'].mean().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Average Days on Market")
+            fig = make_plot(df_stat, group, GROUP_FREQ, AVG_DOM)
         elif metric == SALE_ASK:
             df_stat = df.query('selling_price > listing_price').groupby([group, grouper])['listing_number'].count().reset_index(name='col')
-            fig = make_plot(df_stat, group, GROUP_FREQ, "Sales over Asking")
+            fig = make_plot(df_stat, group, GROUP_FREQ, SALE_ASK)
         else:
             raise Exception("Unsupported metric")
         st.plotly_chart(fig)
