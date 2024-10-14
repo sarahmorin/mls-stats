@@ -83,7 +83,8 @@ try:
                                    help="Upload a .csv with MLS data in Focus1st format to add to database")
 
     property_type = st.selectbox("Select Property Type",
-                                 ["Single Family", "Condo"])
+                                 ["Single Family", "Condo"],
+                                 index=None)
 
     county = st.text_input("County (optional)",
                             value="",
@@ -93,7 +94,9 @@ try:
 
     if st.button("Upload Data"):
         if len(upload_file) == 0:
-            st.warning("Please select a file to upload")
+            st.warning("Please select a file to upload.")
+        elif property_type == None:
+            st.warning("Please select a property type.")
         else:
             engine = create_engine(st.secrets["DB_CONN"])
             county_df = pd.read_csv('county_key.csv')   #FIXME: hardcoded
