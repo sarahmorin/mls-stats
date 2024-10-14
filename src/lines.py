@@ -18,11 +18,12 @@ def make_plot(df, group, freq, title):
         df['selling_date'] = df['selling_date'].map(to_month)
     elif freq == 'QS':
         df['selling_date'] = df['selling_date'].map(to_quarter_year)
-    df_dict = dict(list(df.groupby(group)))
-    if group == "district":
-        df_dict = dict(sorted(list(df.groupby(group)), key=lambda x: SF_DIST_SORT[x[0]]))
+    df_dict = dict(sorted(list(df.groupby(group)), key=lambda x: SF_DIST_SORT.get(x[0], 100)))
+
     line_style_idx = 0
     fig = pgo.Figure(layout={'title':title})
+
+
     for k,v in df_dict.items():
         fig.add_trace(pgo.Scatter(x=v['selling_date'], y=v['col'], name=k,
                                   line=line_styles[line_style_idx], mode='lines',
@@ -61,14 +62,15 @@ try:
         if len(county) == 0:
             group = "county"
         elif len(county) == 1:
-            include_agg_row = False
             if county[0] == "San Francisco":
                 where += " AND city=\'San Francisco\'"
                 if sf_by_dist:
                     group = "district"
                 else:
+                    include_agg_row = False
                     group = "county"
             else:
+                include_agg_row = False
                 group = "city"
                 where += f" AND county=\'{county[0]}\'"
         else:
@@ -96,7 +98,8 @@ try:
         grouper = pd.Grouper(key='selling_date', freq=GROUP_FREQ)
 
         if metric == AVG_PRICE:
-            df_stat = df.groupby([group, grouper])['selling_price'].mean().reset_index(name='col')
+            df_stat = df.groupby([group,
+                                  grouper])['selling_price'].mean().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.groupby(grouper)['selling_price'].mean().reset_index(name='col')
                 df_summary[group] = 'Total'
@@ -104,7 +107,7 @@ try:
             fig = make_plot(df_stat, group, GROUP_FREQ, AVG_PRICE)
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == MED_PRICE:
-            df_stat = df.groupby([group, grouper])['selling_price'].median().reset_index(name='col')
+            df_stat = df.groupby([group, grouper])['selling_price'].median().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.groupby(grouper)['selling_price'].median().reset_index(name='col')
                 df_summary[group] = 'Total'
@@ -112,7 +115,7 @@ try:
             fig = make_plot(df_stat, group, GROUP_FREQ, MED_PRICE)
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_LIST:
-            df_stat = df.groupby([group, grouper])['sale_over_list'].mean().reset_index(name='col')
+            df_stat = df.groupby([group, grouper])['sale_over_list'].mean().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.groupby(grouper)['sale_over_list'].mean().reset_index(name='col')
                 df_summary[group] = 'Total'
@@ -120,7 +123,7 @@ try:
             fig = make_plot(df_stat, group, GROUP_FREQ, SALE_LIST)
             fig.update_layout(yaxis_tickformat=".0%")
         elif metric == PPSF:
-            df_stat = df.groupby([group, grouper])['sppsf'].mean().reset_index(name='col')
+            df_stat = df.groupby([group, grouper])['sppsf'].mean().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.groupby(grouper)['sppsf'].mean().reset_index(name='col')
                 df_summary[group] = 'Total'
@@ -128,21 +131,21 @@ try:
             fig = make_plot(df_stat, group, GROUP_FREQ, PPSF)
             fig.update_layout(yaxis_tickprefix='$')
         elif metric == SALE_CNT:
-            df_stat = df.groupby([group, grouper])['listing_number'].count().reset_index(name='col')
+            df_stat = df.groupby([group, grouper])['listing_number'].count().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.groupby(grouper)['listing_number'].count().reset_index(name='col')
                 df_summary[group] = 'Total'
                 df_stat = pd.concat([df_stat, df_summary])
             fig = make_plot(df_stat, group, GROUP_FREQ, SALE_CNT)
         elif metric == AVG_DOM:
-            df_stat = df.groupby([group, grouper])['dom'].mean().reset_index(name='col')
+            df_stat = df.groupby([group, grouper])['dom'].mean().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.groupby(grouper)['dom'].mean().reset_index(name='col')
                 df_summary[group] = 'Total'
                 df_stat = pd.concat([df_stat, df_summary])
             fig = make_plot(df_stat, group, GROUP_FREQ, AVG_DOM)
         elif metric == SALE_ASK:
-            df_stat = df.query('selling_price > listing_price').groupby([group, grouper])['listing_number'].count().reset_index(name='col')
+            df_stat = df.query('selling_price > listing_price').groupby([group, grouper])['listing_number'].count().unstack(fill_value=0).stack().reset_index(name='col')
             if include_agg_row:
                 df_summary = df.query('selling_price > listing_price').groupby(grouper)['listing_number'].count().reset_index(name='col')
                 df_summary[group] = 'Total'
