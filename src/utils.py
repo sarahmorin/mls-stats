@@ -163,7 +163,7 @@ def county_info():
                    """)
 
 def to_month(d):
-    return d.strftime("%b")
+    return d.strftime("%b '%y")
 
 def to_quarter(d):
     s = d.strftime("%b")
