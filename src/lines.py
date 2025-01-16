@@ -55,27 +55,22 @@ try:
         # Construct Query
         date_range = where_date_range('selling_date', d1, d2)
         where = f"WHERE {date_range}"
-        group = ""
+        group = "county"
         if ptype != "Any":
             where += f" AND {where_ptype(ptype)}"
 
-        if len(county) == 0:
-            group = "county"
-        elif len(county) == 1:
+        if len(county) == 1:
             if county[0] == "San Francisco":
                 where += " AND city=\'San Francisco\'"
                 if sf_by_dist:
                     group = "district"
                 else:
                     include_agg_row = False
-                    group = "county"
             else:
                 include_agg_row = False
-                group = "city"
                 where += f" AND county=\'{county[0]}\'"
-        else:
+        elif len(county) > 1:
             where += f" AND county IN {tuple(county)}"
-            group = "city"
 
         query = f"SELECT * FROM listings {where}"
 
